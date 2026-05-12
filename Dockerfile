@@ -11,7 +11,7 @@ COPY . /app
 RUN pip install -r requirements.txt
 
 #Expose container port
-EXPOSE 8080
+EXPOSE 5000
 
 #Start flask app
 ENTRYPOINT ["python"]
