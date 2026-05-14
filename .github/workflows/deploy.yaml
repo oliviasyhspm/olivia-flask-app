@@ -47,15 +47,18 @@ jobs:
           --query "taskDefinition.{family: family, taskRoleArn: taskRoleArn, executionRoleArn: executionRoleArn, networkMode: networkMode, containerDefinitions: containerDefinitions, volumes: volumes, placementConstraints: placementConstraints, requiresCompatibilities: requiresCompatibilities, cpu: cpu, memory: memory}" \
           > taskdef.json
 
-        # Update container image
-        cat taskdef.json | jq '.containerDefinitions[0].image = env.IMAGE_URI' > new-taskdef.json
+        # Inject image URI safely
+        jq --arg IMAGE_URI "$IMAGE_URI" '.containerDefinitions[0].image = $IMAGE_URI' taskdef.json > new-taskdef.json
+
+        # Remove null fields to prevent ParamValidation errors
+        jq 'del(.taskRoleArn | select(. == null)) | del(.executionRoleArn | select(. == null))' new-taskdef.json > clean-taskdef.json
 
     - name: Validate task definition JSON
-      run: jq empty new-taskdef.json
+      run: jq empty clean-taskdef.json
 
     - name: Register new task definition
       run: |
-        aws ecs register-task-definition --cli-input-json file://new-taskdef.json
+        aws ecs register-task-definition --cli-input-json file://clean-taskdef.json
 
     - name: Update ECS service
       run: |
