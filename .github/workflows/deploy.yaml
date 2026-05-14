@@ -45,8 +45,7 @@ jobs:
 
     # Export only valid fields
       aws ecs describe-task-definition --task-definition ${{ vars.TASK_DEF }} \
-      --query 'taskDefinition.{family: family, taskRoleArn: taskRoleArn, executionRoleArn: executionRoleArn, networkMode: networkMode, containerDefinitions: containerDefinitions, volumes: volumes, placementConstraints: placementConstraints, requiresCompatibilities: requiresCompatibilities, cpu: cpu, memory: memory}' \
-        > taskdef.json
+      --query 'taskDefinition.{family: family, taskRoleArn: taskRoleArn, executionRoleArn: executionRoleArn, networkMode: networkMode, containerDefinitions: containerDefinitions, volumes: volumes, placementConstraints: placementConstraints, requiresCompatibilities: requiresCompatibilities, cpu: cpu, memory: memory}' \ > taskdef.json
 
     # Update container image
       cat taskdef.json | jq '.containerDefinitions[0].image = env.IMAGE_URI' > new-taskdef.json
